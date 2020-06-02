@@ -16,3 +16,4 @@ Required python libraries:
   
   
  ###### Works only on linux systems
+ to start the app, run Video.py
