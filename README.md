@@ -1,8 +1,6 @@
 # python timelapse app with GUI
 
 Required python libraries:
-   
-   -numpy
   
   -open-cv
   
