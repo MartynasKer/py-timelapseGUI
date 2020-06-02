@@ -16,6 +16,8 @@ class FacebookUploader():
         self.description=self.settings['post_description']
         self.access_token=self.settings['access_token']
         self.page_id=self.settings['page_id']
+        self.upload=self.settings.getboolean('upload_to_facebook')
+        print(self.upload)
         self.UploadEvent = threading.Event()
         
 
@@ -23,7 +25,7 @@ class FacebookUploader():
         while True:
             time.sleep(1)
             
-            if self.file_to_upload.__len__()>0 and self.UploadEvent.is_set():
+            if self.file_to_upload.__len__()>0 and self.UploadEvent.is_set() and self.upload:
                 print("uploading to facebook")
                 if(os.path.exists(self.file_to_upload)):
                     put_video(self.file_to_upload, self.page_id, self.access_token, self.description, self.title)

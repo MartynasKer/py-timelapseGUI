@@ -3,9 +3,9 @@ import tkinter.ttk as ttk
 from cv2 import cv2
 from PIL import ImageTk
 from PIL import Image
-import numpy as np
+
 import threading
-import imutils
+
 import time 
 import datetime
 import Configuration

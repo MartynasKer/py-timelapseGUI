@@ -153,7 +153,7 @@ class Selector():
             
             print(file.video)
             video=cv2.VideoCapture(file.video)
-            video.set(1, 1+ self.config.Fps()*self.thumnail_time)
+            video.set(1, 1+ self.config.Fps()*int(self.thumnail_time))
             ret, frame = video.read()
             video.release()
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -174,11 +174,11 @@ class Selector():
         if incremention > 0 and self.current_pos[2] < (self.files.__len__() - 1):
             for i in range(3):
                 self.current_pos[i] += 1
-                print("+++++++")
+                
         if incremention <0 and self.current_pos[0] > 0:
             for i in range(3):
                 self.current_pos[i] -= 1
-                print("----")
+                
         self.UpdateThumbnails()
 
     
@@ -193,7 +193,8 @@ class Selector():
         self.files=ScanForNewestFiles(self.config.folderPath())
         self.current_pos =[0,1,2]
         self.UpdateThumbnails()
-        self.view_frame.Load(self.files[0].video)
+        if self.files.__len__()>0:
+            self.view_frame.Load(self.files[0].video)
 
 
         
@@ -238,7 +239,7 @@ class VideoView():
         # build ui
         self.toplevel_1 = tk.Toplevel(master)
         self.toplevel_1.title("Viewer")
-        self.toplevel_1.attributes("-zoomed", True)
+        self.toplevel_1.attributes("-fullscreen", True)
         self.toplevel_1.bind("<Escape>", self.QuitFullscreen)
         self.toplevel_1.bind("<F7>", self.EnterFullscreen)
         frame_8 = ttk.Frame(self.toplevel_1)
@@ -279,10 +280,10 @@ class VideoView():
 
 
     def QuitFullscreen(self, event):
-        self.toplevel_1.attributes("-zoomed", False)
+        self.toplevel_1.attributes("-fullscreen", False)
 
     def EnterFullscreen(self, event):
-        self.toplevel_1.attributes("-zoomed", True)
+        self.toplevel_1.attributes("-fullscreen", True)
 
     
         
