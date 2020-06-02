@@ -1,4 +1,4 @@
-# py-timelapseGUI
+# python timelapse app with GUI
 
 Required python libraries:
    
