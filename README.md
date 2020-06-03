@@ -1,8 +1,6 @@
 # python timelapse app with GUI
 
 Required python libraries:
-   
-   -numpy
   
   -open-cv
   
@@ -18,3 +16,4 @@ Required python libraries:
   
   
  ###### Works only on linux systems
+ to start the app, run Video.py
