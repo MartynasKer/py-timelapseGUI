@@ -51,7 +51,7 @@ class TimelapseVideo():
 
 class VideoViewFrame():
     def __init__(self, frame):
-        self.view_frame=tk.Label(frame)
+        self.view_frame=tk.Label(frame,bg='black')
         self.view_frame.pack(side='top', expand=True, fill='both')
         self.current_video_path=""
         self.LoadEvent=threading.Event()
@@ -75,6 +75,7 @@ class VideoViewFrame():
                 self.video.set(1, self.frameCount)
                 ret, frame = self.video.read()
                 if ret:
+                    time.sleep(0.05)
                     self.frameCount+=12
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame = cv2.resize(frame, (960, 540))
@@ -126,7 +127,7 @@ class Selector():
         self.config = Configuration.Configurations()
         self.UIsettings = self.config.con['UISettings']
         self.thumnail_time=self.UIsettings['thumbnail_time']
-        self.selector_frame= tk.Frame(master)
+        self.selector_frame= tk.Frame(master=master, bg='black')
         self.files =[]
         self.thumnails=[]
         self.current_pos = [0, 1, 2]
@@ -217,13 +218,13 @@ class Thumbnail():
 
     def __init__(self, master, view_frame):
         self.view_frame = view_frame
-        self.frame = tk.Frame(master)
+        self.frame = tk.Frame(master=master,bg='black')
         self.video=""
-        self.button = tk.Button(master=self.frame, command=lambda: self.buttonClick() )
+        self.button = tk.Button(master=self.frame, command=lambda: self.buttonClick(),bg='black' )
         self.button.config(text='empty')
         self.button.pack(expand='false', fill='both', side='top')
-        self.label = ttk.Label(self.frame)
-        self.label.config(text='empty')
+        self.label = ttk.Label(master=self.frame)
+        self.label.config(text='empty',foreground='#98a5fa',background='black')
         self.label.pack(side='top')
         self.frame.config(height='100', width='100')
         self.frame.pack(expand='true', fill='both', side='left')
@@ -237,18 +238,18 @@ class Thumbnail():
 class VideoView():
     def __init__(self, master=None):
         # build ui
-        self.toplevel_1 = tk.Toplevel(master)
+        self.toplevel_1 = tk.Toplevel(master=master,bg='black')
         self.toplevel_1.title("Viewer")
         self.toplevel_1.attributes("-fullscreen", True)
         self.toplevel_1.bind("<Escape>", self.QuitFullscreen)
         self.toplevel_1.bind("<F7>", self.EnterFullscreen)
-        frame_8 = ttk.Frame(self.toplevel_1)
-        self.frame_10 = ttk.Frame(frame_8)
+        frame_8 = tk.Frame(self.toplevel_1,bg='black')
+        self.frame_10 = tk.Frame(master=frame_8,bg='black')
         self.frame_10.config(height='450', width='200')
         self.frame_10.pack(expand='true', fill='both', ipady='30', pady='0', side='top')
-        frame_11 = ttk.Frame(frame_8)
-        frame_12 = ttk.Frame(frame_11)
-        button_10 = ttk.Button(master=frame_12,command=lambda: self.selector_frame.ChangeSelection(1))
+        frame_11 = tk.Frame(frame_8)
+        frame_12 = tk.Frame(frame_11)
+        button_10 = tk.Button(master=frame_12,command=lambda: self.selector_frame.ChangeSelection(1),bg='#98a5fa')
         self.img_arrowleft = tk.PhotoImage(file='arrow_left.png')
         button_10.config(image=self.img_arrowleft, text='button_10')
         button_10.pack(expand='true', side='top',fill='both')
@@ -256,11 +257,11 @@ class VideoView():
         frame_12.pack(anchor='n', expand='false', fill='y', ipadx='10', padx='0', side='left')
         self.viewer = VideoViewFrame(self.frame_10)
         self.selector_frame = Selector(frame_11, self.viewer)
-        self.viewer.run()
         
         
-        frame_14 = ttk.Frame(frame_11)
-        button_8 = ttk.Button(master=frame_14,command=lambda: self.selector_frame.ChangeSelection(-1) )
+        
+        frame_14 = tk.Frame(frame_11)
+        button_8 = tk.Button(master=frame_14,command=lambda: self.selector_frame.ChangeSelection(-1),bg='#98a5fa' )
         self.img_arrowright = tk.PhotoImage(file='arrow_right.png')
         button_8.config(image=self.img_arrowright, text='button_8',)
         button_8.pack(expand='true', pady='0', side='top', fill='both')

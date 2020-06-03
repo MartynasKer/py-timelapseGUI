@@ -241,7 +241,7 @@ if __name__ == "__main__":
     TimerThread.daemon =True
     PreviewThread.daemon = True
     RecThread.daemon = True
-    
+    View_window.viewer.run()
     fileManager.run()
     PreviewThread.start()
     TimerThread.start()
