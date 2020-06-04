@@ -29,7 +29,7 @@ class Configurations():
         return int(self.camSettings['timelapse_timer'])
     
     def VideoLength(self):
-        video_length = self.camSettings['video_length']
+        video_length = self.camSettings['recording_length']
         if int(video_length) > 86400:
             return 86400
         else:
