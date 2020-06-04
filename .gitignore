@@ -5587,7 +5587,7 @@ __pycache__/YoutubeUpload.cpython-37.pyc
 .venv/Scripts/range-detector
 .venv/Scripts/symilar.exe
 .vscode/settings.json
-videos/2020-06-02_1.avi
+videos
 videos/2020-06-02_2.avi
 videos/2020-06-02_3.avi
 videos/2020-06-02_4.avi
@@ -5611,3 +5611,7 @@ videos/2020-06-02_20.avi
 videos/2020-06-02_21.avi
 videos/2020-06-02_22.avi
 videos/2020-06-02_23.avi
+videos/2020-06-04_1.avi
+videos/2020-06-04_2.avi
+videos/2020-06-04_3.avi
+videos/2020-06-04.avi

@@ -104,8 +104,8 @@ def GenerateFilePath(path):
 def RecLoop():
         current_recording_path=""
         out, current_recording_path = VideoWriter(str(datetime.date.today()))
-        counter = 0
-        today= datetime.date.today()
+        
+        today= None
         recording = True
         
         while True:
@@ -116,16 +116,11 @@ def RecLoop():
                 
                  
                 ret, frame = cap.read()
-                counter = counter + 1
+                
                 out.write(frame)
                 
             
-            if counter >= config.VideoLength() * config.Fps() and recording:
-                
-                out.release()
-                fileManager.DirEvent.set()
-                stopTimer.set()
-                recording = False
+           
                 
 
 
@@ -136,8 +131,8 @@ def RecLoop():
             
             if int(SecondsFromMidnight()) >= int(config.VideoStartTime()) and not recording and today != datetime.date.today():
                 today = datetime.date.today()
-                
-                out.release()
+                if out.isOpened():
+                    out.release()
                 fileManager.DirEvent.set()
                 YtUploader.newest_file_path=current_recording_path
                 YtUploader.uploadEvent.set()
@@ -150,7 +145,7 @@ def RecLoop():
             
 
 
-            if stopRec.is_set():
+            if stopRec.is_set() and recording:
                 print("ending recording")
                 out.release()
                 fileManager.DirEvent.set()
@@ -187,7 +182,8 @@ def TimerLoop():
             
             
             elapsed_time = int(time.time()) - int(StartTime)
-            
+            if elapsed_time >= config.VideoLength():
+                stopRec.set()
             TimerUpdate(str(datetime.timedelta(seconds=elapsed_time)))
         
 
