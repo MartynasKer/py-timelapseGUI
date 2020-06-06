@@ -18,6 +18,98 @@ import GUI
 
 
 
+class VideoStream():
+    def __init__(self):
+        self.path=None
+        self.timer=0
+        self.cap=cv2.VideoCapture(self.path)
+        self.stop =threading.Event()
+        self.NewestFrame=cv2.imread("NoImage.png")
+        
+
+    def run(self):
+        self.Thread=threading.Thread(target=self.Stream)
+        self.Thread.daemon = True
+        self.Thread.start()
+
+
+    def Stream(self):
+        while True:
+            if self.cap.isOpened():
+                ret, frame = self.cap.read()
+            
+                self.NewestFrame=frame
+                time.sleep(self.timer)
+       
+        self.cap.release()
+
+
+class TimelapseStream(VideoStream):
+    def __init__(self):
+        
+        self.timer=0.01
+        self.cap = cv2.VideoCapture()
+        self.cap.release()
+        self.path="timelapse"
+        self.stop =threading.Event()
+        self.NewestFrame=cv2.imread("NoImage.png")
+        
+    
+    def Load(self, path):
+        self.cap=cv2.VideoCapture(path)
+
+    
+
+class Camera(VideoStream):
+    def __init__(self):
+        config = Configuration.Configurations()
+        self.timer=0
+        self.path="camera"
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(3, config.resolution()[0])
+        self.cap.set(4, config.resolution()[1])
+        self.stop =threading.Event()
+        self.NewestFrame=cv2.imread("NoImage.png")
+        
+
+
+    
+            
+
+
+class FrameProcessor():
+    def __init__(self, video_stream):
+        self.ProcessedFrame=None
+        self.stream=video_stream
+        
+
+    def run(self):
+        self.thread= threading.Thread(target=self.Process)
+        self.thread.daemon=True
+        self.thread.start()
+
+    def Process(self):
+        
+        while True:
+            
+            frame = self.stream.NewestFrame
+            try:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.resize(frame, (800, 450))
+                image = Image.fromarray(frame)
+                image = ImageTk.PhotoImage(image)
+                self.ProcessedFrame=image
+                time.sleep(0.05)
+            except:
+                pass
+
+
+
+       
+
+
+
+
 
 
 
@@ -32,18 +124,11 @@ def SecondsFromMidnight():
 
 def UpdateScreen(camFrame, panel1):
     
-    ret, frame = cap.read()
-      
-            
-
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = cv2.resize(frame, (640, 360))
-    image = Image.fromarray(frame)
-    image = ImageTk.PhotoImage(image)
-    
+   
+    image=VideoProcessor1.ProcessedFrame
         
     if camFrame == None:
-        print(" 1initializing screen")
+        print("initializing screen")
         
         
        
@@ -81,7 +166,7 @@ def PreviewLoop():
             
      
 def ButtonFunction():
-    print("lol")
+    
     stopRec.set()
  
 def VideoWriter(path):
@@ -109,13 +194,13 @@ def RecLoop():
         recording = True
         
         while True:
-            time.sleep(Record_timer)
+            time.sleep(Record_timer+0.04)
             if recording:
                 if not out.isOpened():
                     out, current_recording_path=VideoWriter(str(datetime.date.today()))
                 
                  
-                ret, frame = cap.read()
+                frame = Cam.NewestFrame
                 
                 out.write(frame)
                 
@@ -126,7 +211,7 @@ def RecLoop():
 
             if stopEverything.is_set():
                 out.release()
-                cap.release()
+
                 return
             
             if int(SecondsFromMidnight()) >= int(config.VideoStartTime()) and not recording and today != datetime.date.today():
@@ -192,14 +277,29 @@ def TimerLoop():
 
 if __name__ == "__main__":
     
+    
 
 
 
     config = Configuration.Configurations()
     gui_thread= tk.Tk()
-    Preview_window = GUI.VideoPreview(gui_thread)
-    View_window = GUI.VideoView(gui_thread)
+    Cam = Camera()
+    
+    VideoProcessor1 = FrameProcessor(Cam)
+    
 
+    videoStreamer=TimelapseStream()
+    VideoProcessor2 = FrameProcessor(videoStreamer)
+    Cam.run()
+    
+    
+    
+    Preview_window = GUI.VideoPreview(gui_thread)
+    View_window = GUI.VideoView(gui_thread, videoStreamer, VideoProcessor2, VideoProcessor1)
+    VideoProcessor1.run()
+    videoStreamer.run()
+    VideoProcessor2.run()
+    
     stopRec = threading.Event()
     resetTimer = threading.Event()
     stopTimer =threading.Event()
@@ -221,10 +321,7 @@ if __name__ == "__main__":
     preview_timer = 0
 
 
-    cap = cv2.VideoCapture(0)
     
-    cap.set(3, config.resolution()[0])
-    cap.set(4, config.resolution()[1])
 
     
     
@@ -238,6 +335,7 @@ if __name__ == "__main__":
     PreviewThread.daemon = True
     RecThread.daemon = True
     View_window.viewer.run()
+    View_window.previewer.run()
     fileManager.run()
     PreviewThread.start()
     TimerThread.start()
@@ -250,7 +348,7 @@ if __name__ == "__main__":
 
     #to stop recording and save the file before closing
     stopEverything.set()
-    
+    Cam.cap.release()
     #wait for things to go off
     time.sleep(1)
     print("closing")

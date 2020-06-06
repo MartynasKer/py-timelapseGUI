@@ -8,6 +8,7 @@ import datetime
 from cv2 import cv2
 import threading 
 import time
+import Video
 
 
 
@@ -46,14 +47,47 @@ class TimelapseVideo():
         
         self.name=""
 
+class PreviewFrame():
+    def __init__(self, frame, preview_processor):
+        self.frame=tk.Label(frame,bg='black')
+        self.frame.pack(side='right', expand=True, fill='both')
+        
+        self.frameProcessor=preview_processor
+
+
+    def ViewThread(self):
+        
+        while True:
+            time.sleep(0.01)
+            img = self.frameProcessor.ProcessedFrame
+            
+            self.frame.configure(image=img)
+            self.frame.image=img
+                
+
+
+            
+            
+                
+
+    def run(self):
+        thread = threading.Thread(target=self.ViewThread)
+        thread.daemon=True
+        thread.start()
+
+
 
 
 
 class VideoViewFrame():
-    def __init__(self, frame):
+    def __init__(self, frame, streamer, processor):
         self.view_frame=tk.Label(frame,bg='black')
-        self.view_frame.pack(side='top', expand=True, fill='both')
+        self.view_frame.pack(side='left', expand=True, fill='both')
         self.current_video_path=""
+        self.frameProcessor=processor
+        
+        self.stream = streamer
+        
         self.LoadEvent=threading.Event()
         self.frameCount=1
         
@@ -63,26 +97,19 @@ class VideoViewFrame():
         
     def Load(self, path):
         
-        
+        self.loaded = True
         self.current_video_path=path
-        self.frameCount=1
-        self.video=cv2.VideoCapture(self.current_video_path)
+        self.stream.Load(path)
         
 
     def ViewThread(self):
         
         while True:
-                self.video.set(1, self.frameCount)
-                ret, frame = self.video.read()
-                if ret:
-                    time.sleep(0.05)
-                    self.frameCount+=12
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    frame = cv2.resize(frame, (960, 540))
-                    image = Image.fromarray(frame)
-                    img = ImageTk.PhotoImage(image)
-                    self.view_frame.configure(image=img)
-                    self.view_frame.image=img
+            time.sleep(0.01)
+            img = self.frameProcessor.ProcessedFrame
+            
+            self.view_frame.configure(image=img)
+            self.view_frame.image=img
                 
 
 
@@ -236,7 +263,7 @@ class Thumbnail():
 
 
 class VideoView():
-    def __init__(self, master=None):
+    def __init__(self, master, streamer, processor, cam_processor):
         # build ui
         self.toplevel_1 = tk.Toplevel(master=master,bg='black')
         self.toplevel_1.title("Viewer")
@@ -255,7 +282,10 @@ class VideoView():
         button_10.pack(expand='true', side='top',fill='both')
         frame_12.config(height='200', width='100')
         frame_12.pack(anchor='n', expand='false', fill='y', ipadx='10', padx='0', side='left')
-        self.viewer = VideoViewFrame(self.frame_10)
+        self.stream=streamer
+        self.processor=processor
+        self.viewer = VideoViewFrame(self.frame_10, self.stream, self.processor)
+        self.previewer= PreviewFrame(self.frame_10, cam_processor)
         self.selector_frame = Selector(frame_11, self.viewer)
         
         

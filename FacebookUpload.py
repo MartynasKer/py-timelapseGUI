@@ -19,7 +19,7 @@ class FacebookUploader():
         self.upload=self.settings.getboolean('upload_to_facebook')
         print(self.upload)
         self.UploadEvent = threading.Event()
-        
+    
 
     def UploadThread(self):
         while True:
