@@ -23,7 +23,7 @@ class VideoStream():
         self.path=None
         self.timer=0
         self.cap=cv2.VideoCapture(self.path)
-        self.stop =threading.Event()
+        self.frameTaken = threading.Event()
         self.NewestFrame=cv2.imread("NoImage.png")
         
 
@@ -32,13 +32,15 @@ class VideoStream():
         self.Thread.daemon = True
         self.Thread.start()
 
+    
 
     def Stream(self):
         while True:
             if self.cap.isOpened():
                 ret, frame = self.cap.read()
-            
+
                 self.NewestFrame=frame
+                self.frameTaken.set()
                 time.sleep(self.timer)
        
         self.cap.release()
@@ -47,11 +49,11 @@ class VideoStream():
 class TimelapseStream(VideoStream):
     def __init__(self):
         
-        self.timer=0.01
+        self.timer=0.03
         self.cap = cv2.VideoCapture()
         self.cap.release()
         self.path="timelapse"
-        self.stop =threading.Event()
+        self.frameTaken = threading.Event()
         self.NewestFrame=cv2.imread("NoImage.png")
         
     
@@ -68,18 +70,15 @@ class Camera(VideoStream):
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
-        self.stop =threading.Event()
+        self.frameTaken = threading.Event()
         self.NewestFrame=cv2.imread("NoImage.png")
         
 
 
-    
-            
-
-
-class FrameProcessor():
+class CamProcessor():
     def __init__(self, video_stream):
         self.ProcessedFrame=None
+        self.Processed = threading.Event()
         self.stream=video_stream
         
 
@@ -91,15 +90,55 @@ class FrameProcessor():
     def Process(self):
         
         while True:
-            
+           
             frame = self.stream.NewestFrame
+            self.stream.frameTaken.clear()
             try:
+                start_time=time.time()   
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (800, 450))
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 self.ProcessedFrame=image
-                time.sleep(0.05)
+                print(time.time()-start_time)    
+                    
+            except:
+                print("hello")
+
+            
+
+
+class FrameProcessor():
+    def __init__(self, video_stream):
+        self.ProcessedFrame=None
+        self.Processed = threading.Event()
+       
+        self.stream=video_stream
+        
+
+
+    
+
+    def run(self):
+        self.thread= threading.Thread(target=self.Process)
+        self.thread.daemon=True
+        self.thread.start()
+
+    def Process(self):
+        
+        while True:
+    
+            frame = self.stream.NewestFrame
+            
+            try:
+                    
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.resize(frame, (800, 450))
+                image = Image.fromarray(frame)
+                image = ImageTk.PhotoImage(image)
+                self.ProcessedFrame=image
+                self.Processed.set()
+                    
             except:
                 pass
 
@@ -150,21 +189,7 @@ def UpdateScreen(camFrame, panel1):
   
     
     
-
-
-def PreviewLoop():
-    CameraFrame = None
     
-    
-    while not stopPreview.is_set():
-        time.sleep(preview_timer) 
-        if stopPreview.is_set():
-            print("stopping")
-            return
-        CameraFrame = UpdateScreen(camFrame=CameraFrame, panel1=Preview_window.preview_panel)
-    return
-            
-     
 def ButtonFunction():
     
     stopRec.set()
@@ -172,15 +197,15 @@ def ButtonFunction():
 def VideoWriter(path):
     
     file_path = GenerateFilePath(os.path.join(config.folderPath(),path))
-    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'XVID'), config.Fps(), config.resolution()), file_path
+    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), config.resolution()), file_path
 
 def GenerateFilePath(path):
-    path_enumerator = path + ".avi"
+    path_enumerator = path + ".mp4"
     path_counter = 0
     while os.path.exists(path_enumerator):
         
         path_counter = path_counter + 1
-        path_enumerator = path +"_"+str(path_counter)+".avi"
+        path_enumerator = path +"_"+str(path_counter)+".mp4"
     return path_enumerator
 
     
@@ -249,8 +274,7 @@ def RecLoop():
 
                 
 
-def TimerUpdate(updateString):
-    Preview_window.updateTime(updateString)                
+            
 
             
 def TimerLoop():
@@ -262,14 +286,14 @@ def TimerLoop():
                 resetTimer.clear()
                 elapsed_time = int(time.time()) - int(StartTime)
             
-                TimerUpdate(str(datetime.timedelta(seconds=elapsed_time)))
+                
         if not stopTimer.is_set():
             
             
             elapsed_time = int(time.time()) - int(StartTime)
             if elapsed_time >= config.VideoLength():
                 stopRec.set()
-            TimerUpdate(str(datetime.timedelta(seconds=elapsed_time)))
+            
         
 
 
@@ -285,7 +309,7 @@ if __name__ == "__main__":
     gui_thread= tk.Tk()
     Cam = Camera()
     
-    VideoProcessor1 = FrameProcessor(Cam)
+    VideoProcessor1 = CamProcessor(Cam)
     
 
     videoStreamer=TimelapseStream()
@@ -294,7 +318,7 @@ if __name__ == "__main__":
     
     
     
-    Preview_window = GUI.VideoPreview(gui_thread)
+    
     View_window = GUI.VideoView(gui_thread, videoStreamer, VideoProcessor2, VideoProcessor1)
     VideoProcessor1.run()
     videoStreamer.run()
@@ -312,9 +336,7 @@ if __name__ == "__main__":
     
     
     
-    button_1 = tk.Button(master=Preview_window.frame_4, command=lambda: ButtonFunction())
-    button_1.config(text='stop recording')
-    button_1.pack(side='top')
+    
     
     
     Record_timer = config.TimelapseTimer()
@@ -325,19 +347,18 @@ if __name__ == "__main__":
 
     
     
-    PreviewThread = threading.Thread(target=PreviewLoop)
     RecThread = threading.Thread(target=RecLoop)
     TimerThread = threading.Thread(target=TimerLoop)
 
     #to stop the threads if main window closes
     
     TimerThread.daemon =True
-    PreviewThread.daemon = True
+    
     RecThread.daemon = True
     View_window.viewer.run()
     View_window.previewer.run()
     fileManager.run()
-    PreviewThread.start()
+    
     TimerThread.start()
     YtUploader.run()
     FbUploader.run()

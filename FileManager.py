@@ -40,7 +40,7 @@ class FileManager():
         oldest_file=str("")
         for dirpath, dirnames, files in os.walk(path):
             for file_enumerator in files:
-                if file_enumerator.endswith(".avi"):
+                if file_enumerator.endswith(".mp4"):
                     print(file_enumerator)
                     date_part = file_enumerator[:10]
                     date = datetime.datetime.strptime(date_part, "%Y-%m-%d")

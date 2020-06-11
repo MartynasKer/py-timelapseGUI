@@ -51,18 +51,21 @@ class PreviewFrame():
     def __init__(self, frame, preview_processor):
         self.frame=tk.Label(frame,bg='black')
         self.frame.pack(side='right', expand=True, fill='both')
-        
+        self.showed=threading.Event()
         self.frameProcessor=preview_processor
 
 
     def ViewThread(self):
         
         while True:
-            time.sleep(0.01)
-            img = self.frameProcessor.ProcessedFrame
             
+            time.sleep(0.025)
+            img = self.frameProcessor.ProcessedFrame
+            self.frameProcessor.Processed.clear()
             self.frame.configure(image=img)
             self.frame.image=img
+            
+                
                 
 
 
@@ -100,12 +103,13 @@ class VideoViewFrame():
         self.loaded = True
         self.current_video_path=path
         self.stream.Load(path)
+       
         
 
     def ViewThread(self):
         
         while True:
-            time.sleep(0.01)
+            time.sleep(0.025)
             img = self.frameProcessor.ProcessedFrame
             
             self.view_frame.configure(image=img)
@@ -132,7 +136,7 @@ def ScanForNewestFiles(path):
     Files = []
     for dirpath, dirnames, files in os.walk(path):
             for file_enumerator in files:
-                if file_enumerator.endswith(".avi"):
+                if file_enumerator.endswith(".mp4"):
                     
                     file = TimelapseVideo()
                     file.name = file_enumerator[:-4]
@@ -282,9 +286,8 @@ class VideoView():
         button_10.pack(expand='true', side='top',fill='both')
         frame_12.config(height='200', width='100')
         frame_12.pack(anchor='n', expand='false', fill='y', ipadx='10', padx='0', side='left')
-        self.stream=streamer
-        self.processor=processor
-        self.viewer = VideoViewFrame(self.frame_10, self.stream, self.processor)
+        
+        self.viewer = VideoViewFrame(self.frame_10, streamer, processor)
         self.previewer= PreviewFrame(self.frame_10, cam_processor)
         self.selector_frame = Selector(frame_11, self.viewer)
         
