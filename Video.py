@@ -15,7 +15,11 @@ import YoutubeUpload
 import FacebookUpload
 import GUI
 
-
+class Recorder():
+    def __init__(self):
+        self.snap = threading.Event()
+    
+    
 
 
 class VideoStream():
@@ -52,9 +56,10 @@ class TimelapseStream(VideoStream):
         self.timer=0.03
         self.cap = cv2.VideoCapture()
         self.cap.release()
+        
         self.path="timelapse"
         self.frameTaken = threading.Event()
-        self.NewestFrame=cv2.imread("NoImage.png")
+        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
         
     
     def Load(self, path):
@@ -71,7 +76,7 @@ class Camera(VideoStream):
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
         self.frameTaken = threading.Event()
-        self.NewestFrame=cv2.imread("NoImage.png")
+        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
         
 
 
@@ -94,16 +99,16 @@ class CamProcessor():
             frame = self.stream.NewestFrame
             self.stream.frameTaken.clear()
             try:
-                start_time=time.time()   
+                   
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (800, 450))
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 self.ProcessedFrame=image
-                print(time.time()-start_time)    
+                    
                     
             except:
-                print("hello")
+                print("failed to process image")
 
             
 
@@ -133,7 +138,7 @@ class FrameProcessor():
             try:
                     
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.resize(frame, (800, 450))
+                
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 self.ProcessedFrame=image
@@ -196,8 +201,13 @@ def ButtonFunction():
  
 def VideoWriter(path):
     
-    file_path = GenerateFilePath(os.path.join(config.folderPath(),path))
+    file_path = path+"h"
     return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), config.resolution()), file_path
+
+def SmallerResWriter(path):
+    file_path = GenerateFilePath(os.path.join(config.folderPath(),path))
+    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), (800,450)) 
+
 
 def GenerateFilePath(path):
     path_enumerator = path + ".mp4"
@@ -214,21 +224,23 @@ def GenerateFilePath(path):
 def RecLoop():
         current_recording_path=""
         out, current_recording_path = VideoWriter(str(datetime.date.today()))
-        
+        small_out = SmallerResWriter(str(datetime.date.today()))
         today= None
         recording = True
         
         while True:
             time.sleep(Record_timer+0.04)
             if recording:
-                if not out.isOpened():
+                if not out.isOpened() and not small_out.isOpened():
                     out, current_recording_path=VideoWriter(str(datetime.date.today()))
+                    small_out = SmallerResWriter(str(datetime.date.today()))
                 
                  
                 frame = Cam.NewestFrame
                 
                 out.write(frame)
-                
+                frame =cv2.resize(frame, (800,450))
+                small_out.write(frame)
             
            
                 
@@ -236,13 +248,14 @@ def RecLoop():
 
             if stopEverything.is_set():
                 out.release()
-
+                small_out.release()
                 return
             
             if int(SecondsFromMidnight()) >= int(config.VideoStartTime()) and not recording and today != datetime.date.today():
                 today = datetime.date.today()
-                if out.isOpened():
+                if out.isOpened() and small_out.isOpened():
                     out.release()
+                    small_out.release()
                 fileManager.DirEvent.set()
                 YtUploader.newest_file_path=current_recording_path
                 YtUploader.uploadEvent.set()
@@ -250,6 +263,7 @@ def RecLoop():
                 FbUploader.UploadEvent.set()
                 resetTimer.set()
                 stopTimer.clear()
+                time.sleep(1)
                 recording = True
 
             
@@ -258,6 +272,7 @@ def RecLoop():
             if stopRec.is_set() and recording:
                 print("ending recording")
                 out.release()
+                small_out.release()
                 fileManager.DirEvent.set()
                 YtUploader.newest_file_path=current_recording_path
                 YtUploader.uploadEvent.set()
@@ -329,9 +344,10 @@ if __name__ == "__main__":
     stopTimer =threading.Event()
     stopEverything = threading.Event()
     stopPreview = threading.Event()
-    fileManager = FileManager.FileManager(View_window.selector_frame)
     YtUploader=YoutubeUpload.YouTubeUploader()
     FbUploader = FacebookUpload.FacebookUploader()
+    fileManager = FileManager.FileManager(View_window.selector_frame, YtUploader, FbUploader)
+   
 
     
     
@@ -346,7 +362,7 @@ if __name__ == "__main__":
     
 
     
-    
+    time.sleep(0.5)
     RecThread = threading.Thread(target=RecLoop)
     TimerThread = threading.Thread(target=TimerLoop)
 

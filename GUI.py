@@ -136,7 +136,7 @@ def ScanForNewestFiles(path):
     Files = []
     for dirpath, dirnames, files in os.walk(path):
             for file_enumerator in files:
-                if file_enumerator.endswith(".mp4"):
+                if file_enumerator.endswith(".mp4") and not file_enumerator.endswith("h.mp4"):
                     
                     file = TimelapseVideo()
                     file.name = file_enumerator[:-4]

@@ -175,6 +175,7 @@ class YouTubeUploader():
         self.keywords = config['keywords']
         self.privacyStatus = config['privacyStatus']
         self.upload=config.getboolean('upload_to_youtube')
+        self.uploaded=threading.Event()
 
     def run(self):
       self.thread = threading.Thread(target=self.UploadingThread)
@@ -194,8 +195,8 @@ class YouTubeUploader():
         if self.uploadEvent.is_set() and self.newest_file_path.__len__()>0:
           print("uploading to youtube")
           self.UploadVideo(self.newest_file_path)
-          self.newest_file_path=""
-          self.uploadEvent.clear()
+          
+          
 
 
     def UploadVideo(self, path):
@@ -221,8 +222,13 @@ class YouTubeUploader():
       youtube = get_authenticated_service(args)
       try:
         initialize_upload(youtube, args)
+
       except HttpError as e:
         print ("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+        return
+      self.newest_file_path=""
+      self.uploadEvent.clear()
+      self.uploaded.set()
 
 
 

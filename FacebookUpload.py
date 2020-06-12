@@ -19,6 +19,7 @@ class FacebookUploader():
         self.upload=self.settings.getboolean('upload_to_facebook')
         print(self.upload)
         self.UploadEvent = threading.Event()
+        self.uploaded=threading.Event()
     
 
     def UploadThread(self):
@@ -31,6 +32,7 @@ class FacebookUploader():
                     put_video(self.file_to_upload, self.page_id, self.access_token, self.description, self.title)
                 self.file_to_upload = ""
                 self.UploadEvent.clear()
+                self.uploaded.set()
                 
     
 
