@@ -15,10 +15,7 @@ import YoutubeUpload
 import FacebookUpload
 import GUI
 
-class Recorder():
-    def __init__(self):
-        self.snap = threading.Event()
-    
+
     
 
 
@@ -27,7 +24,7 @@ class VideoStream():
         self.path=None
         self.timer=0
         self.cap=cv2.VideoCapture(self.path)
-        self.frameTaken = threading.Event()
+        
         self.NewestFrame=cv2.imread("NoImage.png")
         
 
@@ -44,7 +41,7 @@ class VideoStream():
                 ret, frame = self.cap.read()
 
                 self.NewestFrame=frame
-                self.frameTaken.set()
+                
                 time.sleep(self.timer)
        
         self.cap.release()
@@ -58,7 +55,7 @@ class TimelapseStream(VideoStream):
         self.cap.release()
         
         self.path="timelapse"
-        self.frameTaken = threading.Event()
+        
         self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
         
     
@@ -75,7 +72,7 @@ class Camera(VideoStream):
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
-        self.frameTaken = threading.Event()
+        
         self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
         
 
@@ -97,7 +94,7 @@ class CamProcessor():
         while True:
            
             frame = self.stream.NewestFrame
-            self.stream.frameTaken.clear()
+            
             try:
                    
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -229,7 +226,12 @@ def RecLoop():
         recording = True
         
         while True:
-            time.sleep(Record_timer+0.04)
+            if Record_timer >0:
+                time.sleep(Record_timer)
+            else:
+                time.sleep(1/config.Fps())
+
+             
             if recording:
                 if not out.isOpened() and not small_out.isOpened():
                     out, current_recording_path=VideoWriter(str(datetime.date.today()))
@@ -356,6 +358,9 @@ if __name__ == "__main__":
     
     
     Record_timer = config.TimelapseTimer()
+    if not Record_timer > 0:
+        Record_timer = 1/config.Fps()
+    
     preview_timer = 0
 
 
