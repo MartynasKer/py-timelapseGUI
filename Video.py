@@ -56,7 +56,7 @@ class TimelapseStream(VideoStream):
         
         self.path="timelapse"
         
-        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
+        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(960,700) )
         
     
     def Load(self, path):
@@ -73,7 +73,7 @@ class Camera(VideoStream):
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
         
-        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(800,450) )
+        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(960,700) )
         
 
 
@@ -98,7 +98,7 @@ class CamProcessor():
             try:
                    
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.resize(frame, (800, 450))
+                frame = cv2.resize(frame, (960,700))
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 self.ProcessedFrame=image
@@ -203,7 +203,7 @@ def VideoWriter(path):
 
 def SmallerResWriter(path):
     file_path = GenerateFilePath(os.path.join(config.folderPath(),path))
-    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), (800,450)) 
+    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), (960,700)) 
 
 
 def GenerateFilePath(path):
@@ -241,7 +241,7 @@ def RecLoop():
                 frame = Cam.NewestFrame
                 
                 out.write(frame)
-                frame =cv2.resize(frame, (800,450))
+                frame =cv2.resize(frame, (960,700))
                 small_out.write(frame)
             
            

@@ -190,7 +190,7 @@ class Selector():
             ret, frame = video.read()
             video.release()
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = cv2.resize(frame, (256, 200))
+            frame = cv2.resize(frame, (384, 300))
             image = Image.fromarray(frame)
             
             image = ImageTk.PhotoImage(image)
@@ -278,7 +278,7 @@ class VideoView():
         frame_8 = tk.Frame(self.toplevel_1,bg='black')
         self.frame_10 = tk.Frame(master=frame_8,bg='black')
         self.frame_10.config(height='450', width='200')
-        self.frame_10.pack(expand='true', fill='both', ipady='30', pady='0', side='top')
+        self.frame_10.pack(expand='true', fill='both', ipady='0', pady='0', side='top')
         frame_11 = tk.Frame(frame_8)
         frame_12 = tk.Frame(frame_11)
         button_10 = tk.Button(master=frame_12,command=lambda: self.selector_frame.ChangeSelection(1),bg='#98a5fa')
