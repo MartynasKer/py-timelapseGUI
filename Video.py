@@ -73,7 +73,7 @@ class Camera(VideoStream):
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
         
-        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(960,700) )
+        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(1280,720) )
         
 
 
@@ -98,12 +98,14 @@ class CamProcessor():
             try:
                    
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.resize(frame, (960,700))
+                frame = cv2.resize(frame, (1280,720))
+                frame = frame[10:710,160:1120]
                 image = Image.fromarray(frame)
                 image = ImageTk.PhotoImage(image)
                 self.ProcessedFrame=image
+                time.sleep(preview_timer)
                     
-                    
+                
             except:
                 print("failed to process image")
 
@@ -240,7 +242,8 @@ def RecLoop():
                 frame = Cam.NewestFrame
                 
                 write.out.write(frame)
-                frame =cv2.resize(frame, (960,700))
+                frame =cv2.resize(frame, (1280,720))
+                frame=frame[10:710,160:1120]
                 write.small_out.write(frame)
             
            
@@ -370,7 +373,7 @@ if __name__ == "__main__":
     if not Record_timer > 0:
         Record_timer = 1/config.Fps()
     
-    preview_timer = 0
+    preview_timer = config
 
 
     
