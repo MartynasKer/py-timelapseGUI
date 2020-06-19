@@ -373,7 +373,7 @@ if __name__ == "__main__":
     if not Record_timer > 0:
         Record_timer = 1/config.Fps()
     
-    preview_timer = config
+    preview_timer = config.preview_timer
 
 
     
