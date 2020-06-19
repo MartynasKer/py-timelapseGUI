@@ -46,23 +46,7 @@ class FileManager():
             for file_enumerator in files:
                 if file_enumerator.endswith(".mp4") and not file_enumerator.endswith("h.mp4"):
                     print(file_enumerator)
-                    date_part = file_enumerator[:10]
-                    date = datetime.datetime.strptime(date_part, "%Y-%m-%d")
-                    if date <= oldest_date:
-                        if date == oldest_date:
-                            if oldest_enumerator == None or int(file_enumerator[11:-4]) < oldest_enumerator:
-                                oldest_enumerator = int(file_enumerator[11:-4])
-                                oldest_date=date
-                                oldest_file= os.path.join(dirpath, file_enumerator)
-                            if file_enumerator.__len__() == 14:
-                                oldest_enumerator = 0
-                                oldest_date=date
-                                oldest_file= os.path.join(dirpath, file_enumerator)
-
-                        else:
-                            oldest_enumerator = None
-                            oldest_date = date
-                            oldest_file = os.path.join(dirpath, file_enumerator)
+                    oldest_file = os.path.join(dirpath, file_enumerator)
         
         return oldest_file
     

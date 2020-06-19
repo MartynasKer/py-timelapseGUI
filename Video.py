@@ -198,70 +198,69 @@ def ButtonFunction():
  
 def VideoWriter(path):
     
-    file_path = path+"h"
+    file_path = GenerateFilePath(os.path.join(config.folderPath(),path),"h")
     return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), config.resolution()), file_path
 
 def SmallerResWriter(path):
-    file_path = GenerateFilePath(os.path.join(config.folderPath(),path))
+    file_path = GenerateFilePath(os.path.join(config.folderPath(),path), "")
     return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), (960,700)) 
 
 
-def GenerateFilePath(path):
-    path_enumerator = path + ".mp4"
+def GenerateFilePath(path, ending):
+    time=datetime.datetime.now()
+    if config.thumbnail_with_time:
+        return path +"_"+time.strftime("%H.%M") + ending + ".mp4"
+    path_enumerator = path+ending +".mp4"
     path_counter = 0
     while os.path.exists(path_enumerator):
         
         path_counter = path_counter + 1
-        path_enumerator = path +"_"+str(path_counter)+".mp4"
+        path_enumerator = path +"_"+str(path_counter)+ending+".mp4"
     return path_enumerator
 
     
 
 
 def RecLoop():
-        current_recording_path=""
-        out, current_recording_path = VideoWriter(str(datetime.date.today()))
-        small_out = SmallerResWriter(str(datetime.date.today()))
+        
+        
         today= None
         recording = True
         
         while True:
-            if Record_timer >0:
-                time.sleep(Record_timer)
-            else:
-                time.sleep(1/config.Fps())
-
-             
+            
+           
+            
             if recording:
-                if not out.isOpened() and not small_out.isOpened():
-                    out, current_recording_path=VideoWriter(str(datetime.date.today()))
-                    small_out = SmallerResWriter(str(datetime.date.today()))
+                if not write.small_out.isOpened():
+                    write.out, write.current_recording_path=VideoWriter(str(datetime.date.today()))
+                    write.small_out = SmallerResWriter(str(datetime.date.today()))
                 
                  
                 frame = Cam.NewestFrame
                 
-                out.write(frame)
+                write.out.write(frame)
                 frame =cv2.resize(frame, (960,700))
-                small_out.write(frame)
+                write.small_out.write(frame)
             
            
                 
 
 
             if stopEverything.is_set():
-                out.release()
-                small_out.release()
+                write.out.release()
+                write.small_out.release()
                 return
             
             if int(SecondsFromMidnight()) >= int(config.VideoStartTime()) and not recording and today != datetime.date.today():
                 today = datetime.date.today()
-                if out.isOpened() and small_out.isOpened():
-                    out.release()
-                    small_out.release()
+                if write.out.isOpened() and write.small_out.isOpened():
+                    write.out.release()
+                    write.small_out.release()
                 fileManager.DirEvent.set()
-                YtUploader.newest_file_path=current_recording_path
+                YtUploader.newest_file_path=write.current_recording_path
                 YtUploader.uploadEvent.set()
-                FbUploader.file_to_upload=current_recording_path
+                FbUploader.file_to_upload=write.current_recording_path
                 FbUploader.UploadEvent.set()
                 resetTimer.set()
                 stopTimer.clear()
@@ -273,17 +272,22 @@ def RecLoop():
 
             if stopRec.is_set() and recording:
                 print("ending recording")
-                out.release()
-                small_out.release()
+                write.out.release()
+                write.small_out.release()
                 fileManager.DirEvent.set()
-                YtUploader.newest_file_path=current_recording_path
+                YtUploader.newest_file_path=write.current_recording_path
                 YtUploader.uploadEvent.set()
-                FbUploader.file_to_upload=current_recording_path
+                FbUploader.file_to_upload=write.current_recording_path
                 FbUploader.UploadEvent.set()
                 resetTimer.set()
                 stopTimer.set()
                 recording = False
                 stopRec.clear()
+            
+            if Record_timer >0:
+                time.sleep(Record_timer)
+            else:
+                time.sleep(1/config.Fps())
             
             
                 
@@ -314,7 +318,12 @@ def TimerLoop():
         
 
 
-        
+class Writers():
+    def __init__(self):
+        out, current_recording_path = VideoWriter(str(datetime.date.today()))
+        self.out=out
+        self.current_recording_path=current_recording_path
+        self.small_out=SmallerResWriter(str(datetime.date.today()))         
 
 if __name__ == "__main__":
     
@@ -328,7 +337,7 @@ if __name__ == "__main__":
     
     VideoProcessor1 = CamProcessor(Cam)
     
-
+    
     videoStreamer=TimelapseStream()
     VideoProcessor2 = FrameProcessor(videoStreamer)
     Cam.run()
@@ -336,7 +345,7 @@ if __name__ == "__main__":
     
     
     
-    View_window = GUI.VideoView(gui_thread, videoStreamer, VideoProcessor2, VideoProcessor1)
+    View_window = GUI.VideoView(gui_thread, videoStreamer, VideoProcessor2, VideoProcessor1, config)
     VideoProcessor1.run()
     videoStreamer.run()
     VideoProcessor2.run()
@@ -368,6 +377,7 @@ if __name__ == "__main__":
 
     
     time.sleep(0.5)
+    
     RecThread = threading.Thread(target=RecLoop)
     TimerThread = threading.Thread(target=TimerLoop)
 
@@ -379,7 +389,7 @@ if __name__ == "__main__":
     View_window.viewer.run()
     View_window.previewer.run()
     fileManager.run()
-    
+    write=Writers()
     TimerThread.start()
     YtUploader.run()
     FbUploader.run()
@@ -391,8 +401,13 @@ if __name__ == "__main__":
     #to stop recording and save the file before closing
     stopEverything.set()
     Cam.cap.release()
+  
+
     #wait for things to go off
     time.sleep(1)
+    if write.out.isOpened() and write.small_out.isOpened():
+        write.out.release()
+        write.small_out.release()
     print("closing")
     
         

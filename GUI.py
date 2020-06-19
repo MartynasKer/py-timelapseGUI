@@ -48,9 +48,17 @@ class TimelapseVideo():
         self.name=""
 
 class PreviewFrame():
-    def __init__(self, frame, preview_processor):
+    def __init__(self, frame, preview_processor, config):
+        
         self.frame=tk.Label(frame,bg='black')
-        self.frame.pack(side='right', expand=True, fill='both')
+        self.frame.pack(side='top', expand=True, fill='both')
+        self.text_frame=tk.Frame(frame, bg='black')
+        
+        
+        self.label = ttk.Label(master=self.text_frame)
+        self.label.config(text=config.timestamp,foreground='#98a5fa',background='black',font='Helvetica 18')
+        self.label.pack(side='right')
+        self.text_frame.pack(side='bottom', fill='x', expand='true')
         self.showed=threading.Event()
         self.frameProcessor=preview_processor
 
@@ -84,10 +92,18 @@ class PreviewFrame():
 
 class VideoViewFrame():
     def __init__(self, frame, streamer, processor):
-        self.view_frame=tk.Label(frame,bg='black')
-        self.view_frame.pack(side='left', expand=True, fill='both')
         
+        self.view_frame=tk.Label(frame,bg='black')
+        self.view_frame.pack(side='top', expand=True, fill='both')
+        self.text_frame=tk.Frame(frame, bg='black')
+        
+        
+        self.label = ttk.Label(master=self.text_frame)
+        self.label.config(text='test',foreground='#98a5fa',background='black',font='Helvetica 18')
+        self.label.pack(side='right')
+        self.text_frame.pack(side='bottom', fill='x', expand='true')
         self.current_video_path=""
+        
         self.frameProcessor=processor
         
         self.stream = streamer
@@ -99,10 +115,11 @@ class VideoViewFrame():
         
         
         
-    def Load(self, path):
+    def Load(self, path, name):
         
         self.loaded = True
         self.current_video_path=path
+        self.label.config(text= name ,foreground='#98a5fa',background='black',font='Helvetica 18')
         self.stream.Load(path)
        
         
@@ -198,6 +215,7 @@ class Selector():
             self.thumnails[i].button.image=image
             
             self.thumnails[i].label.config(text=file.name)
+            self.thumnails[i].name = file.name
             self.thumnails[i].video = file.video
             
 
@@ -227,7 +245,7 @@ class Selector():
         self.current_pos =[0,1,2]
         self.UpdateThumbnails()
         if self.files.__len__()>0:
-            self.view_frame.Load(self.files[0].video)
+            self.view_frame.Load(self.files[0].video, self.files[0].name)
 
 
         
@@ -252,6 +270,7 @@ class Thumbnail():
         self.view_frame = view_frame
         self.frame = tk.Frame(master=master,bg='black')
         self.video=""
+        self.name=""
         self.button = tk.Button(master=self.frame, command=lambda: self.buttonClick(),bg='black' )
         self.button.config(text='empty')
         self.button.pack(expand='false', fill='both', side='top')
@@ -261,14 +280,16 @@ class Thumbnail():
         self.frame.config(height='100', width='100')
         self.frame.pack(expand='true', fill='both', side='left')
     def buttonClick(self):
-        self.view_frame.Load(self.video)
+        self.view_frame.Load(self.video, self.name)
         
         
         
 
 
 class VideoView():
-    def __init__(self, master, streamer, processor, cam_processor):
+    def __init__(self, master, streamer, processor, cam_processor,config):
+
+        
         # build ui
         self.toplevel_1 = tk.Toplevel(master=master,bg='black')
         self.toplevel_1.title("Viewer")
@@ -278,7 +299,12 @@ class VideoView():
         frame_8 = tk.Frame(self.toplevel_1,bg='black')
         self.frame_10 = tk.Frame(master=frame_8,bg='black')
         self.frame_10.config(height='450', width='200')
+        self.frame_10_r= tk.Frame(master=self.frame_10,bg='black')
+        self.frame_10_r.pack(expand='true', fill='x', ipady='0', pady='0', side='right')
+        self.frame_10_l=tk.Frame(master=self.frame_10,bg='black')
+        self.frame_10_l.pack(expand='true', fill='x', ipady='0', pady='0', side='left')
         self.frame_10.pack(expand='true', fill='both', ipady='0', pady='0', side='top')
+        
         frame_11 = tk.Frame(frame_8)
         frame_12 = tk.Frame(frame_11)
         button_10 = tk.Button(master=frame_12,command=lambda: self.selector_frame.ChangeSelection(1),bg='#98a5fa')
@@ -288,8 +314,8 @@ class VideoView():
         frame_12.config(height='200', width='100')
         frame_12.pack(anchor='n', expand='false', fill='y', ipadx='10', padx='0', side='left')
         
-        self.viewer = VideoViewFrame(self.frame_10, streamer, processor)
-        self.previewer= PreviewFrame(self.frame_10, cam_processor)
+        self.viewer = VideoViewFrame(self.frame_10_l, streamer, processor)
+        self.previewer= PreviewFrame(self.frame_10_r, cam_processor,config)
         self.selector_frame = Selector(frame_11, self.viewer)
         
         

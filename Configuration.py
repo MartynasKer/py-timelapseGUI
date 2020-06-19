@@ -13,6 +13,9 @@ class Configurations():
         self.fileSettings = self.con['FileManagerSettings']
         self.youtubeSettings = self.con['YoutubeSettings']
         self.facebookSettings= self.con['FacebookSettings']
+        self.UISettings=self.con['UISettings']
+        self.thumbnail_with_time=self.UISettings.getboolean('thumbnail_name_with_time')
+        self.timestamp=self.UISettings['live_timestamp_text']
     def resolution(self):
         return int(self.camSettings['Resolution_width']), int(self.camSettings['Resolution_height'])
     
