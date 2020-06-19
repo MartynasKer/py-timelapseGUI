@@ -50,7 +50,7 @@ class VideoStream():
 class TimelapseStream(VideoStream):
     def __init__(self):
         
-        self.timer=0.03
+        self.timer=1/config.Fps()
         self.cap = cv2.VideoCapture()
         self.cap.release()
         

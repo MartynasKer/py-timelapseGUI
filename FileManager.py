@@ -21,6 +21,7 @@ class FileManager():
         self.FbUploader=FbUploader
         self.Settings = self.config.fileSettings
         self.MaxDirSize = int(self.Settings['max_space'])
+        self.DeleteH= self.Settings.getboolean('delete_high_res_files')
         self.Dir = self.config.folderPath()
         self.DirEvent = threading.Event()
         self.selector = Selector
@@ -94,15 +95,15 @@ class FileManager():
         while True:
             time.sleep(1)
          
-            
-            if self.FbUploader.uploaded.is_set() or not self.FbUploader.upload:
+            if self.DeleteH:
+                if self.FbUploader.uploaded.is_set() or not self.FbUploader.upload:
                 
                 
-                if self.YtUploader.uploaded.is_set() or not self.YtUploader.upload:
+                    if self.YtUploader.uploaded.is_set() or not self.YtUploader.upload:
                     
-                    self.DeleteLargeFiles(self.Dir)
-                    self.YtUploader.uploaded.clear()
-                    self.FbUploader.uploaded.clear()
+                        self.DeleteLargeFiles(self.Dir)
+                        self.YtUploader.uploaded.clear()
+                        self.FbUploader.uploaded.clear()
                 
 
 

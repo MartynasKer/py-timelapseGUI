@@ -86,6 +86,7 @@ class VideoViewFrame():
     def __init__(self, frame, streamer, processor):
         self.view_frame=tk.Label(frame,bg='black')
         self.view_frame.pack(side='left', expand=True, fill='both')
+        
         self.current_video_path=""
         self.frameProcessor=processor
         
