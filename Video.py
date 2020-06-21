@@ -107,7 +107,7 @@ class CamProcessor():
                     
                 
             except:
-                pass
+                print("failed to proccess")
 
             
 
