@@ -39,10 +39,10 @@ class VideoStream():
         while True:
             if self.cap.isOpened():
                 ret, frame = self.cap.read()
-
-                self.NewestFrame=frame
+                if ret:
+                    self.NewestFrame=frame
                 
-                time.sleep(self.timer)
+                    time.sleep(self.timer)
        
         self.cap.release()
 
