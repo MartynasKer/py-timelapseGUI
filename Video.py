@@ -107,7 +107,7 @@ class CamProcessor():
                     
                 
             except:
-                print("failed to process image")
+                pass
 
             
 
