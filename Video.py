@@ -42,7 +42,7 @@ class VideoStream():
                 if ret:
                     self.NewestFrame=frame
                 
-                    time.sleep(self.timer)
+                time.sleep(self.timer)
        
         self.cap.release()
 
@@ -67,7 +67,7 @@ class TimelapseStream(VideoStream):
 class Camera(VideoStream):
     def __init__(self):
         config = Configuration.Configurations()
-        self.timer=0
+        self.timer=0.01
         self.path="camera"
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, config.resolution()[0])
