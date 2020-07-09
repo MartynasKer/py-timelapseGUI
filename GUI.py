@@ -206,17 +206,27 @@ class Selector():
             video.set(1, 1+ self.config.Fps()*int(self.thumnail_time))
             ret, frame = video.read()
             video.release()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = cv2.resize(frame, (384, 300))
-            image = Image.fromarray(frame)
+            if ret:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.resize(frame, (384, 300))
+                image = Image.fromarray(frame)
+                image = ImageTk.PhotoImage(image)
+                self.thumnails[i].button.configure(image = image)
+                self.thumnails[i].button.image=image
             
-            image = ImageTk.PhotoImage(image)
-            self.thumnails[i].button.configure(image = image)
-            self.thumnails[i].button.image=image
+                self.thumnails[i].label.config(text=file.name)
+                self.thumnails[i].name = file.name
+                self.thumnails[i].video = file.video
+            else:
+                
+                os.remove(file.video)
+                high_resFile=file.video.replace(".mp4","")+"h"+"mp4"
+                if os.path.exists(high_resFile):
+                    os.remove(high_resFile)
+
+                
+                self.RefreshList()
             
-            self.thumnails[i].label.config(text=file.name)
-            self.thumnails[i].name = file.name
-            self.thumnails[i].video = file.video
             
 
 

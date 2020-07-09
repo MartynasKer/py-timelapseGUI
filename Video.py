@@ -21,7 +21,7 @@ import GUI
 
 class VideoStream():
     def __init__(self):
-        self.path=None
+        self.path=""
         self.timer=0
         self.cap=cv2.VideoCapture(self.path)
         
@@ -38,12 +38,19 @@ class VideoStream():
     def Stream(self):
         while True:
             if self.cap.isOpened():
+                start_time=time.time()
                 ret, frame = self.cap.read()
+                
                 if ret:
                     self.NewestFrame=frame
                 
-                time.sleep(self.timer)
-       
+                
+                
+                if self.path=="timelapse":
+                    time.sleep(self.timer-time.time()+start_time)
+                else:
+                    time.sleep(self.timer)
+
         self.cap.release()
 
 
@@ -67,7 +74,7 @@ class TimelapseStream(VideoStream):
 class Camera(VideoStream):
     def __init__(self):
         config = Configuration.Configurations()
-        self.timer=0.01
+        self.timer=0.1
         self.path="camera"
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, config.resolution()[0])
@@ -174,7 +181,7 @@ def UpdateScreen(camFrame, panel1):
         print("initializing screen")
         
         
-       
+        
         camFrame = tk.Label(master=panel1,image=image)
         camFrame.image = image
         camFrame.pack(side="top")
@@ -287,7 +294,7 @@ def RecLoop():
                 recording = False
                 stopRec.clear()
             
-            if Record_timer >0:
+            if Record_timer > 0:
                 time.sleep(Record_timer)
             else:
                 time.sleep(1/config.Fps())
