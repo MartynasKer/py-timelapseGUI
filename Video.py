@@ -218,7 +218,7 @@ def SmallerResWriter(path):
 def GenerateFilePath(path, ending):
     time=datetime.datetime.now()
     if config.thumbnail_with_time:
-        return path +"_"+time.strftime("%H-%M") + ending + ".mp4"
+        return path +"_"+time.strftime("%H:%M") + ending + ".mp4"
     path_enumerator = path+ending +".mp4"
     path_counter = 0
     while os.path.exists(path_enumerator):

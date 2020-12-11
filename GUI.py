@@ -44,7 +44,7 @@ class VideoPreview():
 class TimelapseVideo():
     def __init__(self):
         self.video=""
-        
+        self.sort_index=0
         self.name=""
 
 class PreviewFrame():
@@ -159,12 +159,27 @@ def ScanForNewestFiles(path):
                     file = TimelapseVideo()
                     file.name = file_enumerator[:-4]
                     file.video = os.path.join(path, file_enumerator)
-                    
+                    file.sort_index=int(file.name.replace("-", "").replace(":","").replace("_",""))
                     
                     Files.append(file)
+    sorted_files=[]
+    
+    while Files.__len__() > 0:
+        max_index=0
+        for file in Files:
+            if file.sort_index > max_index:
+                max_index = file.sort_index
 
-    Files.reverse()
-    return Files
+        for file in Files:
+            if file.sort_index == max_index:
+                sorted_files.append(file)
+                Files.remove(file)
+    
+    
+        
+    
+    
+    return sorted_files
     
 
 

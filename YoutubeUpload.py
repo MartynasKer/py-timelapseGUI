@@ -201,36 +201,42 @@ class YouTubeUploader():
 
     def UploadVideo(self, path):
       
-      argparser.add_argument("--title", help="Video title", default=self.title)
-      argparser.add_argument("--description", help="Video description",
-      default=self.description)
-      argparser.add_argument("--category", default=self.category,
-      help="Numeric video category. " +
-      "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
-      argparser.add_argument("--keywords", help="Video keywords, comma separated",
-      default=self.keywords)
-      argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
-      default=self.privacyStatus, help="Video privacy status.")
+
+      options = UploadOptions()
+      options.title = self.title
+      options.description =self.description
+      options.category =self.category
+      options.keywords=self.keywords
+      options.privacyStatus=self.privacyStatus
+
       
       
        
       if not os.path.exists(path):
         print("file doesnt exist")
         return
-      argparser.add_argument("--file",default=path, help="Video file to upload")
+      options.file = path
       args = argparser.parse_args()
       youtube = get_authenticated_service(args)
       try:
-        initialize_upload(youtube, args)
+        initialize_upload(youtube, options)
 
       except HttpError as e:
         print ("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
-        return
+        
       self.newest_file_path=""
       self.uploadEvent.clear()
       self.uploaded.set()
 
 
+class UploadOptions():
+    def __init__(self):
+      self.title=""
+      self.description=""
+      self.category=0
+      self.keywords=""
+      self.privacyStatus=""
+      self.file=""
 
     
 
