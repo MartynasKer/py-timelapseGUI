@@ -1,4 +1,5 @@
 .venv/Lib/site-packages/appdirs.py
+__pycache__
 .venv/Lib/site-packages/cycler.py
 .venv/Lib/site-packages/easy_install.py
 .venv/Lib/site-packages/google_api_core-1.17.0-py3.8-nspkg.pth
