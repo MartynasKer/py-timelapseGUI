@@ -3,14 +3,9 @@ import Configuration
 import threading
 import datetime
 import time
+import AppPath
 
 MB_TO_B= 1024*1024
-
-
-
-
-
-
 
 
 class FileManager():
@@ -25,6 +20,7 @@ class FileManager():
         self.Dir = self.config.folderPath()
         self.DirEvent = threading.Event()
         self.selector = Selector
+        self.deleteRetryCounter=0
 
     def dirSize(self, path):
         size = 0
@@ -42,11 +38,13 @@ class FileManager():
         oldest_date = datetime.datetime.max
         oldest_enumerator = None 
         oldest_file=str("")
+        Files = [] 
         for dirpath, dirnames, files in os.walk(path):
             for file_enumerator in files:
-                if file_enumerator.endswith(".mp4") and not file_enumerator.endswith("h.mp4"):
-                    print(file_enumerator)
-                    oldest_file = os.path.join(dirpath, file_enumerator)
+                if file_enumerator.endswith(".mp4"):  
+                    Files.append(os.path.join(dirpath, file_enumerator))
+        Files.sort(key=os.path.getctime)
+        return Files[0]
         
         return oldest_file
     
@@ -64,7 +62,7 @@ class FileManager():
                     try:
                         os.remove(os.path.join(dirpath, file_enumerator))
                     except:
-                        print("failed to delete large file")
+                        pass
 
         
 
@@ -77,7 +75,7 @@ class FileManager():
     def ManageDirectory(self):
         
         while True:
-            time.sleep(1)
+            time.sleep(5)
          
             if self.DeleteH:
                 if self.FbUploader.uploaded.is_set() or not self.FbUploader.upload:
@@ -97,12 +95,16 @@ class FileManager():
                     
                     file_to_delete = self.ScanForOldestFile(self.Dir)
                     try:
+                        print("deleting: " + file_to_delete)
                         os.remove(file_to_delete)
-                    except:
+                    except Exception as e:
                         print("failed to delete file: " + file_to_delete)
-                        self.DirEvent.clear()
-                    print("deleting: " + file_to_delete)
+                        print(e)
+                        self.deleteRetryCounter += 1
                     
+                    if self.deleteRetryCounter >= 3:
+                        self.selector.RefreshList()
+                        self.DirEvent.clear()
                 else:
                     self.selector.RefreshList()
                     self.DirEvent.clear()

@@ -16,8 +16,7 @@ import FacebookUpload
 import GUI
 
 
-    
-
+import AppPath
 
 class VideoStream():
     def __init__(self):
@@ -25,7 +24,7 @@ class VideoStream():
         self.timer=0
         self.cap=cv2.VideoCapture(self.path)
         
-        self.NewestFrame=cv2.imread("NoImage.png")
+        self.NewestFrame=cv2.imread(AppPath.path("NoImage.png"))
         
 
     def run(self):
@@ -45,10 +44,10 @@ class VideoStream():
                     self.NewestFrame=frame
                 
                 
-                
-                if self.path=="timelapse":
-                    time.sleep(self.timer-time.time()+start_time)
-                else:
+                sleep_time = self.timer-time.time()+start_time
+                if self.path=="timelapse" and sleep_time >0:
+                    time.sleep(sleep_time)
+                elif self.path != "timelapse":
                     time.sleep(self.timer)
 
         self.cap.release()
@@ -63,7 +62,7 @@ class TimelapseStream(VideoStream):
         
         self.path="timelapse"
         
-        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(960,700) )
+        self.NewestFrame=cv2.resize(cv2.imread(AppPath.path("NoImage.png")),(960,700) )
         
     
     def Load(self, path):
@@ -80,7 +79,7 @@ class Camera(VideoStream):
         self.cap.set(3, config.resolution()[0])
         self.cap.set(4, config.resolution()[1])
         
-        self.NewestFrame=cv2.resize(cv2.imread("NoImage.png"),(1280,720) )
+        self.NewestFrame=cv2.resize(cv2.imread(AppPath.path("NoImage.png")),(1280,720) )
         
 
 
@@ -208,17 +207,17 @@ def ButtonFunction():
 def VideoWriter(path):
     
     file_path = GenerateFilePath(os.path.join(config.folderPath(),path),"h")
-    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), config.resolution()), file_path
+    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'mp4v'), config.Fps(), config.resolution()), file_path
 
 def SmallerResWriter(path):
     file_path = GenerateFilePath(os.path.join(config.folderPath(),path), "")
-    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'MP4V'), config.Fps(), (960,700)) 
+    return cv2.VideoWriter(file_path, cv2.VideoWriter_fourcc(*'mp4v'), config.Fps(), (960,700)) 
 
 
 def GenerateFilePath(path, ending):
     time=datetime.datetime.now()
     if config.thumbnail_with_time:
-        return path +"_"+time.strftime("%H:%M") + ending + ".mp4"
+        return path +"_"+time.strftime("%H-%M") + ending + ".mp4"
     path_enumerator = path+ending +".mp4"
     path_counter = 0
     while os.path.exists(path_enumerator):
@@ -242,6 +241,7 @@ def RecLoop():
             
             if recording:
                 if not write.small_out.isOpened():
+                    
                     write.out, write.current_recording_path=VideoWriter(str(datetime.date.today()))
                     write.small_out = SmallerResWriter(str(datetime.date.today()))
                 
@@ -330,8 +330,10 @@ def TimerLoop():
 
 class Writers():
     def __init__(self):
+        
         out, current_recording_path = VideoWriter(str(datetime.date.today()))
         self.out=out
+        print("starting recording: " + current_recording_path)
         self.current_recording_path=current_recording_path
         self.small_out=SmallerResWriter(str(datetime.date.today()))         
 
@@ -340,14 +342,12 @@ if __name__ == "__main__":
     
 
 
-
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     config = Configuration.Configurations()
     gui_thread= tk.Tk()
     Cam = Camera()
     
     VideoProcessor1 = CamProcessor(Cam)
-    
-    
     videoStreamer=TimelapseStream()
     VideoProcessor2 = FrameProcessor(videoStreamer)
     Cam.run()

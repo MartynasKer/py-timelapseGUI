@@ -1,6 +1,6 @@
 import configparser
 import os.path
-
+import AppPath
 
 
 class Configurations():
@@ -8,7 +8,7 @@ class Configurations():
         
         config = configparser.ConfigParser()
         self.con = config
-        self.con.read("config.ini")
+        self.con.read(AppPath.path('config.ini'))
         self.camSettings = self.con['CamSettings']
         self.fileSettings = self.con['FileManagerSettings']
         self.youtubeSettings = self.con['YoutubeSettings']
@@ -23,11 +23,11 @@ class Configurations():
     
 
     def folderPath(self):
-        path = self.fileSettings['folder_path']
+        path = AppPath.path(self.fileSettings['folder_path'])
         if os.path.isdir(path):
             return path
         else:
-            return str("")
+            return AppPath.path("")
 
     def TimelapseTimer(self):
         return int(self.camSettings['timelapse_timer'])

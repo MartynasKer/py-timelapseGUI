@@ -17,7 +17,6 @@ class FacebookUploader():
         self.access_token=self.settings['access_token']
         self.page_id=self.settings['page_id']
         self.upload=self.settings.getboolean('upload_to_facebook')
-        print(self.upload)
         self.UploadEvent = threading.Event()
         self.uploaded=threading.Event()
     

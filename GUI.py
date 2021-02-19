@@ -9,7 +9,7 @@ from cv2 import cv2
 import threading 
 import time
 import Video
-
+import AppPath
 
 
 
@@ -216,7 +216,6 @@ class Selector():
         for i in range(i_range):
             file=self.files[self.current_pos[i]]
             
-            print(file.video)
             video=cv2.VideoCapture(file.video)
             video.set(1, 1+ self.config.Fps()*int(self.thumnail_time))
             ret, frame = video.read()
@@ -316,7 +315,8 @@ class VideoView():
 
         
         # build ui
-        self.toplevel_1 = tk.Toplevel(master=master,bg='black')
+        master.config(bg='black')
+        self.toplevel_1 = master
         self.toplevel_1.title("Viewer")
         self.toplevel_1.attributes("-fullscreen", True)
         self.toplevel_1.bind("<Escape>", self.QuitFullscreen)
@@ -333,7 +333,7 @@ class VideoView():
         frame_11 = tk.Frame(frame_8)
         frame_12 = tk.Frame(frame_11)
         button_10 = tk.Button(master=frame_12,command=lambda: self.selector_frame.ChangeSelection(1),bg='#98a5fa')
-        self.img_arrowleft = tk.PhotoImage(file='arrow_left.png')
+        self.img_arrowleft = tk.PhotoImage(file=AppPath.path('arrow_left.png'))
         button_10.config(image=self.img_arrowleft, text='button_10')
         button_10.pack(expand='true', side='top',fill='both')
         frame_12.config(height='200', width='100')
@@ -347,7 +347,7 @@ class VideoView():
         
         frame_14 = tk.Frame(frame_11)
         button_8 = tk.Button(master=frame_14,command=lambda: self.selector_frame.ChangeSelection(-1),bg='#98a5fa' )
-        self.img_arrowright = tk.PhotoImage(file='arrow_right.png')
+        self.img_arrowright = tk.PhotoImage(file=AppPath.path('arrow_right.png'))
         button_8.config(image=self.img_arrowright, text='button_8',)
         button_8.pack(expand='true', pady='0', side='top', fill='both')
         frame_14.config(height='200', width='100')
