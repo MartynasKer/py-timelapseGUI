@@ -1,11 +1,9 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from cv2 import cv2
+import cv2
 from PIL import ImageTk
 from PIL import Image
-
 import threading
-
 import time 
 import datetime
 import Configuration
@@ -14,8 +12,6 @@ import os.path
 import YoutubeUpload
 import FacebookUpload
 import GUI
-
-
 import AppPath
 
 class VideoStream():
@@ -127,8 +123,6 @@ class FrameProcessor():
         
 
 
-    
-
     def run(self):
         self.thread= threading.Thread(target=self.Process)
         self.thread.daemon=True
@@ -155,11 +149,6 @@ class FrameProcessor():
 
 
        
-
-
-
-
-
 
 
 def SecondsFromMidnight():
@@ -419,21 +408,3 @@ if __name__ == "__main__":
         write.out.release()
         write.small_out.release()
     print("closing")
-    
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

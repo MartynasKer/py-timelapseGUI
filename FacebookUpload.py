@@ -38,6 +38,7 @@ class FacebookUploader():
 
 
     def run(self):
+        print("starting fb thread")
         self.thread=threading.Thread(target=self.UploadThread)
         self.thread.daemon= True
         self.thread.start()
@@ -65,6 +66,8 @@ def get_api(cfg):
 def put_video(video_url, page_id, access_token, description, title):
     video_file_name=title
     local_video_file=video_url
+    print(local_video_file)
+
     path = "{0}/videos".format(page_id)
     fb_url = "https://graph-video.facebook.com/{0}?access_token={1}".format(
              path, access_token)
@@ -74,7 +77,7 @@ def put_video(video_url, page_id, access_token, description, title):
         fields={'description': description,
                 'title': title,
                 'comment':'postvideo',
-                'source': (video_file_name, open(local_video_file, 'rb'))}
+                'source': (local_video_file, open(local_video_file, 'rb'))}
     )
     r = requests.post(fb_url, headers={'Content-Type': m.content_type}, data=m) 
     if r.status_code == 200:

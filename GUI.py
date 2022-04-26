@@ -5,7 +5,7 @@ import os
 from PIL import Image
 from PIL import ImageTk
 import datetime
-from cv2 import cv2
+import cv2
 import threading 
 import time
 import Video
@@ -270,19 +270,6 @@ class Selector():
         self.UpdateThumbnails()
         if self.files.__len__()>0:
             self.view_frame.Load(self.files[0].video, self.files[0].name)
-
-
-        
-    
-    
-        
-        
-
-
-
-
-
-
 
 
 
