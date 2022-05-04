@@ -1,3 +1,4 @@
+from cmath import e
 import tkinter as tk
 import tkinter.ttk as ttk
 import cv2
@@ -6,6 +7,8 @@ from PIL import Image
 import threading
 import time 
 import datetime
+
+from cv2 import log
 import Configuration
 import FileManager
 import os.path
@@ -13,6 +16,7 @@ import YoutubeUpload
 import FacebookUpload
 import GUI
 import AppPath
+import logging
 
 class VideoStream():
     def __init__(self):
@@ -108,8 +112,9 @@ class CamProcessor():
                 time.sleep(preview_timer)
                     
                 
-            except:
-                print("failed to proccess")
+            except e:
+                logging.error("failed to proccess")
+                logging.error(e)
 
             
 
@@ -143,7 +148,8 @@ class FrameProcessor():
                 self.ProcessedFrame=image
                 self.Processed.set()
                     
-            except:
+            except e:
+                logging.critical(e)
                 pass
 
 
@@ -166,7 +172,7 @@ def UpdateScreen(camFrame, panel1):
     image=VideoProcessor1.ProcessedFrame
         
     if camFrame == None:
-        print("initializing screen")
+        logging.info("initializing screen")
         
         
         
@@ -270,7 +276,7 @@ def RecLoop():
 
 
             if stopRec.is_set() and recording:
-                print("ending recording")
+                logging.info("ending recording")
                 write.out.release()
                 write.small_out.release()
                 fileManager.DirEvent.set()
@@ -322,7 +328,7 @@ class Writers():
         
         out, current_recording_path = VideoWriter(str(datetime.date.today()))
         self.out=out
-        print("starting recording: " + current_recording_path)
+        logging.info("starting recording: " + current_recording_path)
         self.current_recording_path=current_recording_path
         self.small_out=SmallerResWriter(str(datetime.date.today()))         
 
@@ -330,7 +336,8 @@ if __name__ == "__main__":
     
     
 
-
+    logging.basicConfig(filename="app.log", level=logging.DEBUG, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s') 
+    logging.info("starting app")
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     config = Configuration.Configurations()
     gui_thread= tk.Tk()
@@ -383,7 +390,7 @@ if __name__ == "__main__":
     #to stop the threads if main window closes
     
     TimerThread.daemon =True
-    
+       
     RecThread.daemon = True
     View_window.viewer.run()
     View_window.previewer.run()
@@ -407,4 +414,4 @@ if __name__ == "__main__":
     if write.out.isOpened() and write.small_out.isOpened():
         write.out.release()
         write.small_out.release()
-    print("closing")
+    logging.info("closing")

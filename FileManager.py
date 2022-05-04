@@ -1,3 +1,4 @@
+import logging
 import os
 import Configuration
 import threading
@@ -10,7 +11,7 @@ MB_TO_B= 1024*1024
 
 class FileManager():
     def __init__(self, Selector, YtUploader, FbUploader):
-        print("file manager intilialized")
+        logging.info("file manager intilialized")
         self.config = Configuration.Configurations()
         self.YtUploader=YtUploader
         self.FbUploader=FbUploader
@@ -95,11 +96,11 @@ class FileManager():
                     
                     file_to_delete = self.ScanForOldestFile(self.Dir)
                     try:
-                        print("deleting: " + file_to_delete)
+                        logging.info("deleting: " + file_to_delete)
                         os.remove(file_to_delete)
                     except Exception as e:
-                        print("failed to delete file: " + file_to_delete)
-                        print(e)
+                        logging.error("failed to delete file: " + file_to_delete)
+                        logging.error(e)
                         self.deleteRetryCounter += 1
                     
                     if self.deleteRetryCounter >= 3:

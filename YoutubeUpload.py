@@ -1,6 +1,7 @@
 
 #From developers.google website:
 import http.client
+import logging
 import httplib2
 import os
 import random
@@ -133,11 +134,11 @@ def resumable_upload(insert_request):
   retry = 0
   while response is None:
     try:
-      print ("Uploading file...")
+      logging.info("Uploading file...")
       status, response = insert_request.next_chunk()
       if response is not None:
         if 'id' in response:
-          print ("Video id '%s' was successfully uploaded." % response['id'])
+          logging.info("Video id '%s' was successfully uploaded." % response['id'])
         else:
           exit("The upload failed with an unexpected response: %s" % response)
     except HttpError as e:
@@ -149,14 +150,14 @@ def resumable_upload(insert_request):
       error = "A retriable error occurred: %s" % e
 
     if error is not None:
-      print (error)
+      logging.error(error)
       retry += 1
       if retry > MAX_RETRIES:
         exit("No longer attempting to retry.")
 
       max_sleep = 2 ** retry
       sleep_seconds = random.random() * max_sleep
-      print ("Sleeping %f seconds and then retrying..." % sleep_seconds)
+      logging.info("Sleeping %f seconds and then retrying..." % sleep_seconds)
       time.sleep(sleep_seconds)
 
 #End of code from developers.google website
@@ -193,7 +194,7 @@ class YouTubeUploader():
 
 
         if self.uploadEvent.is_set() and self.newest_file_path.__len__()>0:
-          print("uploading to youtube")
+          logging.info("uploading to youtube")
           self.UploadVideo(self.newest_file_path)
           
           
@@ -213,7 +214,7 @@ class YouTubeUploader():
       
        
       if not os.path.exists(path):
-        print("file doesnt exist")
+        logging.error("file doesnt exist")
         return
       options.file = path
       args = argparser.parse_args()
@@ -222,7 +223,7 @@ class YouTubeUploader():
         initialize_upload(youtube, options)
 
       except HttpError as e:
-        print ("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+         logging.error("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
         
       self.newest_file_path=""
       self.uploadEvent.clear()

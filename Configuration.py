@@ -1,4 +1,5 @@
 import configparser
+import logging
 import os.path
 import AppPath
 
@@ -61,7 +62,7 @@ class Configurations():
 
 if __name__ =="__main__":
     config = Configurations()
-    print(config.resolution())
-    print(config.VideoStartTime())
-    print(config.folderPath())
+    logging.info(config.resolution())
+    logging.info(config.VideoStartTime())
+    logging.info(config.folderPath())
 

@@ -1,3 +1,5 @@
+import logging
+from cv2 import log
 import facebook
 import os
 import requests
@@ -26,7 +28,7 @@ class FacebookUploader():
             time.sleep(1)
             
             if self.file_to_upload.__len__()>0 and self.UploadEvent.is_set() and self.upload:
-                print("uploading to facebook")
+                logging.info("uploading to facebook")
                 if(os.path.exists(self.file_to_upload)):
                     put_video(self.file_to_upload, self.page_id, self.access_token, self.description, self.title)
                 self.file_to_upload = ""
@@ -38,7 +40,7 @@ class FacebookUploader():
 
 
     def run(self):
-        print("starting fb thread")
+        logging.info("starting fb thread")
         self.thread=threading.Thread(target=self.UploadThread)
         self.thread.daemon= True
         self.thread.start()
@@ -66,12 +68,12 @@ def get_api(cfg):
 def put_video(video_url, page_id, access_token, description, title):
     video_file_name=title
     local_video_file=video_url
-    print(local_video_file)
+    logging.debug(local_video_file)
 
     path = "{0}/videos".format(page_id)
     fb_url = "https://graph-video.facebook.com/{0}?access_token={1}".format(
              path, access_token)
-    print (fb_url)
+    logging.debug(fb_url)
     # multipart chunked uploads
     m = MultipartEncoder(
         fields={'description': description,
@@ -83,9 +85,9 @@ def put_video(video_url, page_id, access_token, description, title):
     if r.status_code == 200:
         j_res = r.json()
         facebook_video_id = j_res.get('id')
-        print ("facebook_video_id = {0}".format(facebook_video_id))
+        logging.info("facebook_video_id = {0}".format(facebook_video_id))
     else:
-        print ("Facebook upload error: {0}".format(r.text))
+        logging.error ("Facebook upload error: {0}".format(r.text))
 
 def put_unpublishedvideo(video_url, page_id, access_token,description, title):
     video_file_name=title
@@ -93,7 +95,7 @@ def put_unpublishedvideo(video_url, page_id, access_token,description, title):
     path = "{0}/videos".format(page_id)
     fb_url = "https://graph-video.facebook.com/{0}?access_token={1}".format(
              path, access_token)
-    print (fb_url)
+    logging.debug (fb_url)
     # multipart chunked uploads
     m = MultipartEncoder(
         fields={'description': description,
@@ -106,6 +108,6 @@ def put_unpublishedvideo(video_url, page_id, access_token,description, title):
     if r.status_code == 200:
         j_res = r.json()
         facebook_video_id = j_res.get('id')
-        print ("facebook_video_id = {0}".format(facebook_video_id))
+        logging.info ("facebook_video_id = {0}".format(facebook_video_id))
     else:
-        print ("Facebook upload error: {0}".format(r.text))
+        logging.error ("Facebook upload error: {0}".format(r.text))
