@@ -176,6 +176,7 @@ class YouTubeUploader():
         self.keywords = config['keywords']
         self.privacyStatus = config['privacyStatus']
         self.upload=config.getboolean('upload_to_youtube')
+
         self.uploaded=threading.Event()
 
     def run(self):
@@ -187,11 +188,14 @@ class YouTubeUploader():
     
 
     def UploadingThread(self):
+      if self.upload:
+        args = argparser.parse_args()
+        get_authenticated_service(args)
       while True:
         time.sleep(1)
         if not self.upload:
           return
-
+  
 
         if self.uploadEvent.is_set() and self.newest_file_path.__len__()>0:
           logging.info("uploading to youtube")

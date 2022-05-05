@@ -112,7 +112,7 @@ class CamProcessor():
                 time.sleep(preview_timer)
                     
                 
-            except e:
+            except Exception as e:
                 logging.error("failed to proccess")
                 logging.error(e)
 
@@ -148,7 +148,7 @@ class FrameProcessor():
                 self.ProcessedFrame=image
                 self.Processed.set()
                     
-            except e:
+            except Exception as e:
                 logging.critical(e)
                 pass
 
