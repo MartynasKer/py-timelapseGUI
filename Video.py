@@ -278,15 +278,12 @@ def RecLoop():
                 return
             
             if int(SecondsFromMidnight()) >= int(config.VideoStartTime()) and not recording and today != datetime.date.today():
+                logging.info("stopping recording")
                 today = datetime.date.today()
                 if write.out.isOpened() and write.small_out.isOpened():
                     write.out.release()
                     write.small_out.release()
                 fileManager.DirEvent.set()
-                YtUploader.newest_file_path=write.current_recording_path
-                YtUploader.uploadEvent.set()
-                FbUploader.file_to_upload=write.current_recording_path
-                FbUploader.UploadEvent.set()
                 resetTimer.set()
                 stopTimer.clear()
                 time.sleep(1)
