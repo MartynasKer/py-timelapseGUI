@@ -17,7 +17,7 @@ class Configurations():
         self.UISettings=self.con['UISettings']
         self.thumbnail_with_time=self.UISettings.getboolean('thumbnail_name_with_time')
         self.timestamp=self.UISettings['live_timestamp_text']
-        self.preview_timer=int(self.UISettings['live_preview_timer'])
+        self.preview_timer=float(self.UISettings['live_preview_timer'])
     def resolution(self):
         return int(self.camSettings['Resolution_width']), int(self.camSettings['Resolution_height'])
     

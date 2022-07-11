@@ -61,11 +61,30 @@ class TimelapseStream(VideoStream):
         self.cap.release()
         
         self.path="timelapse"
+        self.vid_path=""
         
         self.NewestFrame=cv2.resize(cv2.imread(AppPath.path("NoImage.png")),(960,700) )
         
-    
+    def Stream(self):
+        while True:
+            if self.cap.isOpened():
+                start_time=time.time()
+                ret, frame = self.cap.read()
+                
+                if ret:
+                    self.NewestFrame=frame
+                else:
+                    self.cap.release()
+                    self.Load(self.vid_path)
+                
+                
+                sleep_time = self.timer-time.time()+start_time
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+
+
     def Load(self, path):
+        self.vid_path=path
         self.cap=cv2.VideoCapture(path)
 
     
@@ -115,6 +134,7 @@ class CamProcessor():
             except Exception as e:
                 logging.error("failed to proccess")
                 logging.error(e)
+                time.sleep(1)
 
             
 

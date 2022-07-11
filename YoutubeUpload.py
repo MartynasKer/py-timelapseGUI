@@ -192,7 +192,7 @@ class YouTubeUploader():
         args = argparser.parse_args()
         get_authenticated_service(args)
       while True:
-        time.sleep(1)
+        time.sleep(30)
         if not self.upload:
           return
   
